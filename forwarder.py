@@ -1,5 +1,6 @@
 import sh
 import re
+from multiprocessing import Process
 
 
 def get_file_size(url: str):
@@ -22,12 +23,15 @@ def gen_chunk_pairs(url: str, chunk_size: int, num_chunk: int):
     return pairs
 
 
-def download(pairs: [], url: str):
-    for r, fn in pairs:
-        # options = '-r {} -o {} {}'.format(r, fn, url)
-        options = ['-r', r, '-o', fn, url]
-        print(options)
-        sh.curl(*options)
+def download(pair, url: str):
+    r, fn = pair
+    options = ['-r', r, '-o', fn, url]
+    print(options)
+    sh.curl(*options)
+
+
+def upload(f: str):
+    sh.gdrive('upload', f)
 
 
 def main():
@@ -42,7 +46,16 @@ def main():
     num_chunk = file_size // chunk_size + 1
     pairs = gen_chunk_pairs(URL, chunk_size, num_chunk)
 
-    download(pairs, URL)
+    download(pairs[0], URL)
+    _, fn = pairs[0]
+    for i in range(1, len(pairs)):
+        p = Process(target=upload, args=(fn,))
+        p.start()
+        download(pairs[i], URL)
+        p.join()
+        _, fn = pairs[i]
+    upload(fn)
+
 
 if __name__ == '__main__':
     main()
