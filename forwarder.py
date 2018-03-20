@@ -32,13 +32,14 @@ def download(pair, url: str):
 
 def upload(f: str):
     sh.gdrive('upload', f)
+    sh.rm(f)
 
 
 def main():
     # configs:
     URL = 'https://mirrors6.tuna.tsinghua.edu.cn/archlinux/iso/latest/' + \
     'archlinux-2018.03.01-x86_64.iso'
-    chunk_size = 50*2**20  # 50MB
+    chunk_size = 800*2**20  # 800MB
 
     file_size = get_file_size(URL)
     print('File size: {}'.format(file_size))
