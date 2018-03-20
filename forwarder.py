@@ -1,6 +1,7 @@
 import sh
 import re
 from multiprocessing import Process
+from optparse import OptionParser
 
 
 def get_file_size(url: str):
@@ -36,10 +37,15 @@ def upload(f: str):
 
 
 def main():
+    parser = OptionParser()
+    parser.add_option('-u', '--url',
+            help='URL', action='store')
+    parser.add_option('-c', '--chunk-size',
+            help='chunk size in MB', action='store')
+    (options, args) = parser.parse_args()
     # configs:
-    URL = 'https://mirrors6.tuna.tsinghua.edu.cn/archlinux/iso/latest/' + \
-    'archlinux-2018.03.01-x86_64.iso'
-    chunk_size = 800*2**20  # 800MB
+    URL = options.url
+    chunk_size = int(options.chunk_size)*2**20  # 800MB
 
     file_size = get_file_size(URL)
     print('File size: {}'.format(file_size))
